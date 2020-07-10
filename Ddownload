@@ -1,0 +1,57 @@
+NFS-SERVER= 192.168.118.130
+client= 192.168.118.132
+
+
+ON THE NFS-SERVER SIDE
+
+yum install nfs-utils -y
+mkdir /var/nfsshare
+chmod -R 755 /var/nfsshare
+chown nfsnobody:nfsnobody /var/nfsshare
+ls -ls /var/nfsshare/
+ls -ls /var
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl enable nfs-lock
+systemctl enable nfs-idmap
+systemctl start rpcbind
+systemctl start nfs-server
+systemctl start nfs-lock
+systemctl start nfs-idmap
+
+vi /etc/exports
+add the following;
+/var/nfsshare    192.168.118.132(rw,sync,no_root_squash,no_all_squash)
+/home            192.168.118.132(rw,sync,no_root_squash,no_all_squash)
+
+systemctl restart nfs-server
+ps -ef |grep nfs-server
+systemctl restart nfs-server
+ps -ef |grep nfs-server
+ps -ef |grep nfs
+firewall-cmd --permanent --zone=public --add-service=nfs
+firewall-cmd --permanent --zone=public --add-service=mountd
+firewall-cmd --permanent --zone=public --add-service=rpc-bind
+firewall-cmd --reload
+============================================================================================================
+
+ON THE NFS CLIENT END;
+
+yum install nfs-utils
+mkdir -p /mnt/nfs/home
+mkdir -p /mnt/nfs/var/nfsshare
+mount -t nfs 192.168.118.130:/home /mnt/nfs/home/
+mount -t nfs 192.168.118.130:/var/nfsshare /mnt/nfs/var/nfsshare/
+df -kh
+touch /mnt/nfs/var/nfsshare/test_nfs
+
+Permanent NFS mounting On the Client
+
+vi /etc/fstab
+Add the below;
+192.168.118.130:/home  /mnt/nfs/home   nfs defaults 0 0
+192.168.118.130:/var/nfsshare /mnt/nfs/var/nfsshare   nfs defaults 0 0
+
+
+
+
